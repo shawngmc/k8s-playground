@@ -13,8 +13,8 @@
 | Cluster Node        | VM Spec        | 1 vCPU, 8 GB RAM  (x3 nodes)                   |
 
 
-
-# Prep the Debian VM Image
+# Installation
+## Phase 1: Prep the Debian VM Image
 Largely based on https://tcude.net/creating-a-vm-template-in-proxmox/
 Assumptions
 - Using latest [Debian 12 Bookworm QEMU Image](https://cloud.debian.org/images/cloud/bookworm/) - as of last run, was https://cloud.debian.org/images/cloud/bookworm/20230612-1409/debian-12-generic-amd64-20230612-1409.qcow2
@@ -84,30 +84,27 @@ shutdown -h now
 ```
 11. Right-click on VM in list > 'Convert to Template'
 
-# Make the Rancher Node
-# - Set up the MAC-IP-DNS mapping
-# - Provision the VM
-# - ???
-# - Add Longhorn Storage: 
-https://longhorn.io/
+## Phase 2: Make the Rancher Node
+- Set up the MAC-IP-DNS mapping
+- Provision the VM
+- ???
 
 
-# Make/add the Worker Nodes
-# - Set up the MAC-IP-DNS mapping
-# - Provision the VM
-# - Get the install command from Rancher
-https://ranchermanager.docs.rancher.com/pages-for-subheaders/launch-kubernetes-with-rancher
-# - Add to worker cluster
-# - ???
+## Phase 3: Make/add the Worker Nodes
+- Set up the MAC-IP-DNS mapping
+- Provision the VM
+- Get the install command from Rancher: https://ranchermanager.docs.rancher.com/pages-for-subheaders/launch-kubernetes-with-rancher
+- Add to worker cluster
+- ???
 
 
-# Add cluster Applications
-# - Install MetalLB (external load balancer)
+## Phase 4: Add cluster Applications
+### Install MetalLB (external load balancer)
 Use Helm chart provided by Bitnami as described at: http://xybernetics.com/techtalk/how-to-install-metallb-on-rancher-kubernetes-cluster/
-# - Install Nginx-ingress-controller (internal load-balancing ingress)
+### Install Nginx-ingress-controller (internal load-balancing ingress)
 https://docs.rancherdesktop.io/how-to-guides/setup-NGINX-Ingress-Controller/
-# - Install Istio (service mesh/traffic monitoring/etc.)
+### Install Istio (service mesh/traffic monitoring/etc.)
 https://ranchermanager.docs.rancher.com/pages-for-subheaders/istio-setup-guide
 https://ranchermanager.docs.rancher.com/pages-for-subheaders/istio
-# - Install Longhorn
+### Install Longhorn
 https://ranchermanager.docs.rancher.com/integrations-in-rancher/longhorn#installing-longhorn-with-rancher
