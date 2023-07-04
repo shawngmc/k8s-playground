@@ -7,10 +7,19 @@
 | Host System         | Virt Deployment Automation | Cloud-Init                         |
 | Master Control Node | OS             | Debian 12                                      |
 | Master Control Node | Control Plane  | Rancher v2                                     |
-| Master Control Node | VM Spec        | 1 vCPU, 8 GB RAM  (x1 node)                    |
+| Master Control Node | VM Spec        | 2 vCPU, 8 GB RAM  (x1 node)                    |
 | Cluster Node        | OS             | Debian 12                                      |
 | Cluster Node        | K8s Distro     | RKE2                                           |
-| Cluster Node        | VM Spec        | 1 vCPU, 8 GB RAM  (x3 nodes)                   |
+| Cluster Node        | VM Spec        | 2 vCPU, 8 GB RAM  (x3 nodes)                   |
+
+# Changelog
+## 2023-07-03
+ - Initial planning
+ - Master Control Node
+   - Moved to 2vCPU, suspect 1 core not enough
+   - Disabled AppArmor
+   - Got helm install working
+   - Note: Use ```sudo -i```/consider aliasing
 
 
 # Installation
@@ -88,11 +97,15 @@ shutdown -h now
 ### Plan and Provision the VM
 - Set up the MAC-IP-DNS mapping
 - Provision the VM
+  - Clone
+  - Set number of cores
+  - Set MAC
 ### Set up Rancher
 1. Disable AppArmor (to fix Canal networking?)
 ```
 sudo systemctl stop apparmor
 sudo systemctl disable apparmor
+reboot
 ```
 3. Install single-node RKE2
 ```
@@ -105,6 +118,51 @@ sudo systemctl start rke2-server.service
    - List nodes/check ready state: ```sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes```
    - Get node details: ```sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml describe node```
    - Check cluster pods: ```sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get pods --all-namespaces```
+4. TODO Set up convenience tooling
+```
+# Symlink kubectl
+ln -s $(find /var/lib/rancher/rke2/data/ -name kubectl) /usr/local/bin/kubectl
+ 
+# Set default kubeconfig
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+cat << EOF > /etc/profile.d/kubeconfig.sh
+#!/bin/bash
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+EOF
+chmod 755 /etc/profile.d/kubeconfig.sh
+```
+4. Install Helm
+```
+# Install git, used for plugins
+apt install git -y
+# Download/install helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | sudo bash -
+```
+6. Install Rancher
+```
+# Add chart repo
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+# Create namespace
+sudo -i kubectl create namespace cattle-system
+# Install cert-manager
+# Update CRDs
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.crds.yaml
+# Add the Jetstack Helm repository
+helm repo add jetstack https://charts.jetstack.io
+# Update your local Helm chart repository cache
+helm repo update
+# Install the cert-manager Helm chart
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.11.0
+# Deploy Rancher chart
+helm install rancher rancher-stable/rancher \
+  --namespace cattle-system \
+  --set hostname=rancher.my.org \
+  --set bootstrapPassword=admin
+```
+7. TODO: Test with a domain name and working cert stuff
 
 
 ## Phase 3: Make/add the Worker Nodes
