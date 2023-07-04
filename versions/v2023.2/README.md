@@ -85,9 +85,26 @@ shutdown -h now
 11. Right-click on VM in list > 'Convert to Template'
 
 ## Phase 2: Make the Rancher Node
+### Plan and Provision the VM
 - Set up the MAC-IP-DNS mapping
 - Provision the VM
-- ???
+### Set up Rancher
+1. Disable AppArmor (to fix Canal networking?)
+```
+sudo systemctl stop apparmor
+sudo systemctl disable apparmor
+```
+3. Install single-node RKE2
+```
+curl -sfL https://get.rke2.io | sudo sh -
+sudo systemctl enable rke2-server.service
+sudo systemctl start rke2-server.service
+```
+3. (Optional) Check RKE2 Status
+   - View logs: ```journalctl -u rke2-server -f```
+   - List nodes/check ready state: ```sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes```
+   - Get node details: ```sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml describe node```
+   - Check cluster pods: ```sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get pods --all-namespaces```
 
 
 ## Phase 3: Make/add the Worker Nodes
