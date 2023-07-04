@@ -100,6 +100,8 @@ shutdown -h now
   - Clone
   - Set number of cores
   - Set MAC
+### Setup
+1. TODO: Fix hostname
 ### Set up Rancher
 1. Disable AppArmor (to fix Canal networking?)
 ```
